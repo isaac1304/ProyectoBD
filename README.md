@@ -1,5 +1,5 @@
 # ProyectoBD
-Proyecto Base de Datos Camil Briceño, Sebastian Campos, Isaac Granados
+Proyecto Base de Datos Camil Briceño, Sebastian Campos, Isaac Granados y Antony Fajardo.
 
 Universidad Fidélitas 
  
