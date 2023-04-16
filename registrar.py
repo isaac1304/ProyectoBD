@@ -61,7 +61,7 @@ class Registrar:
             enc = conf_pwd.encode()
             hash1 = hl.md5(enc).hexdigest()
             with open('credentials.txt', 'a') as f:
-                f.write('\n' + correo + '\n')
+                f.write(correo + '\n')
                 f.write(hash1)
                 f.close()
                 print('You have registered successfully!')
