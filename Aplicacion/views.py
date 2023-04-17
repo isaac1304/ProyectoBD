@@ -35,7 +35,7 @@ def reporte(request):
     # Crear el documento con ReportLab
     doc = SimpleDocTemplate(response, pagesize=letter)
     elements = []
-    
+
     # Agregar título al documento
     elements.append(Paragraph('Vista de las devoluciones con información del cliente, el producto y la factura', getSampleStyleSheet()['Heading1']))
 
@@ -69,6 +69,53 @@ def reporte(request):
     doc.build(elements)
     return response
 
+#Vistas Reporte cliente con más compras
+def reporte_clientesmascompras(request):
+    # Obtener los datos de la vista de devoluciones
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT * FROM VENTAS_MENSUALES_COLABORADOR')
+        datos = cursor.fetchall()
+
+    # Generar el reporte con ReportLab
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte.pdf"'
+
+    # Crear el documento con ReportLab
+    doc = SimpleDocTemplate(response, pagesize=letter)
+    elements = []
+
+    # Agregar título al documento
+    elements.append(Paragraph('Vista de los colaboradores con más ventas en el periodo de tiempo seleccionado', getSampleStyleSheet()['Heading1']))
+
+    # Agregar encabezados de columna
+    headings = ('Nombre Colaborador', 'Mes', 'Cantidad ventas')
+    data = [headings] + [tuple(dato[1:]) for dato in datos]
+
+    # Crear la tabla y definir su estilo
+    table = Table(data)
+    style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), '#7f7f7f'),
+        ('TEXTCOLOR', (0, 0), (-1, 0), (1, 1, 1)),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), (1, 1, 1)),
+        ('TEXTCOLOR', (0, 1), (-1, -1), (0, 0, 0)),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 1, (0, 0, 0)),
+    ])
+    table.setStyle(style)
+    elements.append(table)
+
+    # Agregar un espacio en blanco antes del final del documento
+    elements.append(Paragraph('<br/><br/><br/><br/>', getSampleStyleSheet()['Normal']))
+
+    # Cerrar el documento y devolver el archivo
+    doc.build(elements)
+    return response
 
 #Vistas de Login y Registro
 def register(request):
@@ -109,7 +156,7 @@ def user_login(request):
     else:
         messages.error(request, 'The current path, ' + request.path + ', didn’t match any of these.')
         return redirect('index')
-    
+
 def user_login(request):
     if request.method == 'POST':
         form = UserLoginForm(data=request.POST)
@@ -168,12 +215,12 @@ def editarCurso(request):
     codigo = request.POST['txtCodigo']
     nombre = request.POST['txtNombre']
     creditos = request.POST['numCreditos']
-    
+
     curso = Curso.objects.get(codigo=codigo)
     curso.nombre = nombre
     curso.creditos = creditos
     curso.save()
-    
+
     messages.success(request, '¡Curso editado!')
     return redirect('indexCursos')
 
@@ -197,20 +244,20 @@ def registrarCliente(request):
             correo = request.POST['txtCorreo']
             telefono = request.POST['txtTelefono']
             direccion = request.POST['txtDireccion']
-            
+
             cursor = connection.cursor()
             cursor.callproc('SP_INSERTAR_CLIENTE', [cedula, nombre, apellido1, apellido2, nacimiento, correo, telefono, direccion])
             cursor.close()
             connection.commit()
             connection.close()
-            
+
             messages.success(request, '¡Cliente registrado!')
             return redirect('indexClientes')
         except IntegrityError:
             messages.error(request, 'Ya existe un cliente con esta cédula')
         except Exception:
             return HttpResponseServerError()
-    
+
     return render(request, 'Clientes/indexClientes.html')
 
 @login_required
@@ -229,7 +276,7 @@ def editarCliente(request):
     correo = request.POST['txtCorreo']
     telefono = request.POST['txtTelefono']
     direccion = request.POST['txtDireccion']
-    
+
     cursor = connection.cursor()
     resultado = cursor.callfunc('F_ACTUALIZAR_CLIENTE', bool, [cedula, nombre, apellido1, apellido2, nacimiento, correo, telefono, direccion])
     cursor.close()
@@ -258,7 +305,7 @@ def eliminarCliente(request, cedula_cliente):
 def indexClientes(request):
     cursor = connection.cursor()
     clientes_cursor = cursor.callfunc('F_LISTAR_CLIENTES', cx_Oracle.CURSOR)
-    
+
     clientes = []
     for cliente in clientes_cursor:
         clientes.append({
@@ -271,7 +318,7 @@ def indexClientes(request):
             'telefono': cliente[6],
             'direccion': cliente[7]
         })
-        
+
     cursor.close()
     connection.close()
 
@@ -319,7 +366,7 @@ def editarColaborador(request):
     telefono = request.POST['txtTelefono']
     puesto = request.POST['txtPuesto']
     direccion = request.POST['txtDireccion']
-    
+
     cursor = connection.cursor()
     resultado = cursor.callfunc('F_ACTUALIZAR_COLABORADOR', bool, [id_colaborador, cedula, nombre, apellido1, apellido2, correo, telefono, puesto, direccion])
     cursor.close()
@@ -395,7 +442,7 @@ def editarCategoria(request):
     id_categoria = request.POST['id_categoria']
     nombre = request.POST['txtNombre']
     descripcion = request.POST['txtDescripcion']
-    
+
     cursor = connection.cursor()
     resultado = cursor.callfunc('F_ACTUALIZAR_CATEGORIA', bool, [id_categoria, nombre, descripcion])
     cursor.close()
@@ -435,7 +482,7 @@ def indexCategorias(request):
     connection.close()
     return render(request, 'Categorias/indexCategorias.html', {'categorias': categorias})
 
-#Vistas Productos 
+#Vistas Productos
 @login_required
 def indexProductos(request):
     cursor = connection.cursor()
@@ -500,7 +547,7 @@ def editarProducto(request):
     stock = request.POST['txtStock']
     pro_id_categoria = request.POST['cmbCategoria']
     estado = request.POST['cmbEstado']
-    
+
     cursor = connection.cursor()
     resultado = cursor.callfunc('F_ACTUALIZAR_PRODUCTO', bool, [cod_producto, nombre, descripcion, precio, stock, pro_id_categoria, estado])
     cursor.close()
@@ -567,12 +614,12 @@ def editarCategoria(request):
     id_categoria = request.POST['txtId']
     nombre = request.POST['txtNombre']
     descripcion = request.POST['txtDescripcion']
-    
+
     categoria = Categoria.objects.get(id_categoria=id_categoria)
     categoria.nombre = nombre
     categoria.descripcion = descripcion
     categoria.save()
-    
+
     messages.success(request, '¡Categoría editada!')
     return redirect('indexCategorias')
 
@@ -595,8 +642,8 @@ def registrarProducto(request):
     stock = request.POST['stock']
     categoria = request.POST['categoria']
     estado = request.POST['estado']
-    
-    producto = Productos.objects.create(nombre=nombre, descripcion=descripcion, precio=precio, 
+
+    producto = Productos.objects.create(nombre=nombre, descripcion=descripcion, precio=precio,
                                         stock=stock, pro_id_categoria=categoria, estado=estado)
     messages.success(request, '¡Producto registrado!')
     return redirect('indexProductos')
@@ -614,7 +661,7 @@ def editarProducto(request):
     stock = request.POST['stock']
     categoria = request.POST['categoria']
     estado = request.POST['estado']
-    
+
     producto = Productos.objects.get(cod_producto=cod_producto)
     producto.nombre = nombre
     producto.descripcion = descripcion
@@ -623,7 +670,7 @@ def editarProducto(request):
     producto.pro_id_categoria = categoria
     producto.estado = estado
     producto.save()
-    
+
     messages.success(request, '¡Producto editado!')
     return redirect('indexProductos')
 
@@ -657,14 +704,14 @@ def editarProveedor(request):
     correo = request.POST['txtCorreo']
     telefono = request.POST['txtTelefono']
     direccion = request.POST['txtDireccion']
-    
+
     proveedor = Proveedores.objects.get(id_proveedor=id_proveedor)
     proveedor.nombre = nombre
     proveedor.correo = correo
     proveedor.telefono = telefono
     proveedor.direccion = direccion
     proveedor.save()
-    
+
     messages.success(request, '¡Proveedor editado!')
     return redirect('indexProveedores')
 
@@ -683,9 +730,9 @@ def registrarSucursal(request):
     nombre = request.POST['txtNombre']
     telefono = request.POST['txtTelefono']
     direccion = request.POST['txtDireccion']
-    
+
     sucursal = Sucursales.objects.create(nombre=nombre, telefono=telefono, direccion=direccion)
-    
+
     messages.success(request, '¡Sucursal registrada!')
     return redirect('indexSucursales')
 
@@ -698,20 +745,20 @@ def editarSucursal(request):
     nombre = request.POST['txtNombre']
     telefono = request.POST['txtTelefono']
     direccion = request.POST['txtDireccion']
-    
+
     sucursal = Sucursales.objects.get(id_sucursal=id_sucursal)
     sucursal.nombre = nombre
     sucursal.telefono = telefono
     sucursal.direccion = direccion
     sucursal.save()
-    
+
     messages.success(request, '¡Sucursal editada!')
     return redirect('indexSucursales')
 
 def eliminarSucursal(request, id_sucursal):
     sucursal = Sucursales.objects.get(id_sucursal=id_sucursal)
     sucursal.delete()
-    
+
     messages.success(request, '¡Sucursal eliminada!')
     return redirect('indexSucursales')
 
@@ -732,9 +779,9 @@ def registrarFactura(request):
         fecha = request.POST['fecha']
         total_pagado = request.POST['total_pagado']
 
-        factura = Facturas.objects.create(fac_ced_cliente=cedula_cliente, fac_cod_producto=codigo_producto, 
+        factura = Facturas.objects.create(fac_ced_cliente=cedula_cliente, fac_cod_producto=codigo_producto,
                                         fac_id_colaborador=id_colaborador, fecha=fecha, total_pagado=total_pagado)
-        
+
         messages.success(request, '¡Factura registrada!')
         return redirect('indexFacturas')
     else:
@@ -783,12 +830,12 @@ def registrarDevolucion(request):
     dev_cod_producto_id = request.POST['dev_cod_producto_id']
     dev_cod_factura_id = request.POST['dev_cod_factura_id']
     monto_devolucion = request.POST['monto_devolucion']
-    
+
     devolucion = Devoluciones.objects.create(
-        fecha=fecha, 
-        dev_ced_cliente_id=dev_ced_cliente_id, 
-        dev_cod_producto_id=dev_cod_producto_id, 
-        dev_cod_factura_id=dev_cod_factura_id, 
+        fecha=fecha,
+        dev_ced_cliente_id=dev_ced_cliente_id,
+        dev_cod_producto_id=dev_cod_producto_id,
+        dev_cod_factura_id=dev_cod_factura_id,
         monto_devolucion=monto_devolucion
     )
     messages.success(request, '¡Devolución registrada!')
@@ -805,7 +852,7 @@ def editarDevolucion(request):
     dev_cod_producto_id = request.POST['dev_cod_producto_id']
     dev_cod_factura_id = request.POST['dev_cod_factura_id']
     monto_devolucion = request.POST['monto_devolucion']
-    
+
     devolucion = Devoluciones.objects.get(id_devolucion=codigo)
     devolucion.fecha = fecha
     devolucion.dev_ced_cliente_id = dev_ced_cliente_id
@@ -813,7 +860,7 @@ def editarDevolucion(request):
     devolucion.dev_cod_factura_id = dev_cod_factura_id
     devolucion.monto_devolucion = monto_devolucion
     devolucion.save()
-    
+
     messages.success(request, '¡Devolución editada!')
     return redirect('indexDevoluciones')
 
