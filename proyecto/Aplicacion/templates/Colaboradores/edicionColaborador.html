@@ -1,0 +1,58 @@
+{% extends 'index_master.html' %}
+
+{% block title %}Modifcar Cliente{% endblock title %} 
+
+{% block content %}
+
+<div class="right_col row" role="main">
+    <div class="col-md-12 offset-md-12">
+        <h2>Modificar Colaborador {{colaborador.id_colaborador}}</h2>
+        <div class="card">
+            <div class="card-body">
+                <form action="/editarColaborador/" method="POST">{% csrf_token %}
+                    <div class="col-md-6 mb-3">
+                        <label for="exampleInputEmail1" class="form-label">ID</label>
+                        <input type="text" class="form-control" id="id_colaborador" aria-describedby="emailHelp"
+                            name="id_colaborador" class="form-control" value="{{colaborador.id_colaborador}}" readonly required>
+                    </div> 
+                    <div class="col-md-6 mb-3">
+                        <label for="txtCedula" class="form-label">Cédula</label>
+                        <input type="text" class="form-control" id="txtCedula" aria-describedby="emailHelp" name="txtCedula" class="form-control" placeholder="Cédula" value="{{colaborador.cedula_colaborador}}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="txtNombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="txtNombre" aria-describedby="emailHelp" name="txtNombre" class="form-control" placeholder="Nombre" value="{{colaborador.nombre}}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="txtApellido1" class="form-label">Primer Apellido</label>
+                        <input type="text" class="form-control" id="txtApellido1" aria-describedby="emailHelp" name="txtApellido1" class="form-control" placeholder="Primer Apellido" value="{{colaborador.apellido_1}}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="txtApellido2" class="form-label">Segundo Apellido</label>
+                        <input type="text" class="form-control" id="txtApellido2" aria-describedby="emailHelp" name="txtApellido2" class="form-control" placeholder="Segundo Apellido" value="{{colaborador.apellido_2}}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="txtCorreo" class="form-label">Correo</label>
+                        <input type="email" class="form-control" id="txtCorreo" aria-describedby="emailHelp" name="txtCorreo" class="form-control" placeholder="Correo" value="{{colaborador.correo}}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="txtTelefono" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="txtTelefono" aria-describedby="emailHelp" name="txtTelefono" class="form-control" placeholder="Teléfono" value="{{colaborador.telefono}}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="txtPuesto" class="form-label">Puesto</label>
+                        <input type="text" class="form-control" id="txtPuesto" aria-describedby="emailHelp" name="txtPuesto" class="form-control" placeholder="Puesto" value="{{colaborador.puesto}}" required>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label for="txtDireccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="txtDireccion" aria-describedby="emailHelp" name="txtDireccion" class="form-control" placeholder="Dirección" value="{{colaborador.col_direccion}}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Modificar</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
