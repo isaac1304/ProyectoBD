@@ -1,0 +1,35 @@
+{% extends 'index_master.html' %}
+
+{% block title %}Modificar Curso{% endblock title %} 
+
+{% block content %}
+
+<div class="right_col row" role="main">
+    <div class="col-md-12 offset-md-12">
+        <h2>Ediccion del Curso {{curso.codigo}}</h2>
+        <div class="card">
+            <div class="card-body">
+                <form action="/editarCurso/" method="POST">{% csrf_token %}
+                    <div class="mb-3">
+                        <label for="exampleInputEmail1" class="form-label">Codigo</label>
+                        <input type="text" class="form-control" aria-describedby="emailHelp"
+                            name="txtCodigo" class="form-control" value="{{curso.codigo}}" readonly required>
+                    </div> 
+                    <div class="mb-3">
+                        <label for="exampleInputEmail1" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="txtNombre" aria-describedby="emailHelp" name="txtNombre" class="form-control" value="{{curso.nombre}}"
+                        required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exampleInputPassword1" class="form-label">Creditos</label>
+                        <input type="number" class="form-control" id="numCreditos" name="numCreditos" class="form-control" min="1" value="1"
+                        value="{{curso.creditos}}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Modificar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
