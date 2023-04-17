@@ -88,8 +88,55 @@ def reporte_clientesmascompras(request):
     elements.append(Paragraph('Vista de los colaboradores con más ventas en el periodo de tiempo seleccionado', getSampleStyleSheet()['Heading1']))
 
     # Agregar encabezados de columna
+    headings = ('Fecha', 'Cantidad ventas')
+    data = [headings] + [tuple(dato[0:]) for dato in datos]
+
+    # Crear la tabla y definir su estilo
+    table = Table(data)
+    style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), '#7f7f7f'),
+        ('TEXTCOLOR', (0, 0), (-1, 0), (1, 1, 1)),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), (1, 1, 1)),
+        ('TEXTCOLOR', (0, 1), (-1, -1), (0, 0, 0)),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 1, (0, 0, 0)),
+    ])
+    table.setStyle(style)
+    elements.append(table)
+
+    # Agregar un espacio en blanco antes del final del documento
+    elements.append(Paragraph('<br/><br/><br/><br/>', getSampleStyleSheet()['Normal']))
+
+    # Cerrar el documento y devolver el archivo
+    doc.build(elements)
+    return response
+
+def reporte_diasmasventas(request):
+    # Obtener los datos de la vista de devoluciones
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT * FROM DIA_MAX_VENTAS')
+        datos = cursor.fetchall()
+
+    # Generar el reporte con ReportLab
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte.pdf"'
+
+    # Crear el documento con ReportLab
+    doc = SimpleDocTemplate(response, pagesize=letter)
+    elements = []
+
+    # Agregar título al documento
+    elements.append(Paragraph('Vista de los colaboradores con más ventas en el periodo de tiempo seleccionado', getSampleStyleSheet()['Heading1']))
+
+    # Agregar encabezados de columna
     headings = ('Nombre Colaborador', 'Mes', 'Cantidad ventas')
-    data = [headings] + [tuple(dato[1:]) for dato in datos]
+    data = [headings] + [tuple(dato[0:]) for dato in datos]
 
     # Crear la tabla y definir su estilo
     table = Table(data)
