@@ -9,10 +9,66 @@ from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
 from django.db import IntegrityError
-from django.http import HttpResponseServerError
+from django.http import HttpResponse, HttpResponseServerError
 import cx_Oracle
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+
 
 # Create your views here.
+
+#Vistas Reporte
+
+def reporte(request):
+    # Obtener los datos de la vista de devoluciones
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT * FROM vista_devoluciones')
+        datos = cursor.fetchall()
+
+    # Generar el reporte con ReportLab
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte.pdf"'
+
+    # Crear el documento con ReportLab
+    doc = SimpleDocTemplate(response, pagesize=letter)
+    elements = []
+    
+    # Agregar título al documento
+    elements.append(Paragraph('Vista de las devoluciones con información del cliente, el producto y la factura', getSampleStyleSheet()['Heading1']))
+
+    # Agregar encabezados de columna
+    headings = ('Fecha', 'Cliente', 'Producto', 'Factura', 'Monto')
+    data = [headings] + [tuple(dato[1:]) for dato in datos]
+
+    # Crear la tabla y definir su estilo
+    table = Table(data)
+    style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), '#7f7f7f'),
+        ('TEXTCOLOR', (0, 0), (-1, 0), (1, 1, 1)),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), (1, 1, 1)),
+        ('TEXTCOLOR', (0, 1), (-1, -1), (0, 0, 0)),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 1, (0, 0, 0)),
+    ])
+    table.setStyle(style)
+    elements.append(table)
+
+    # Agregar un espacio en blanco antes del final del documento
+    elements.append(Paragraph('<br/><br/><br/><br/>', getSampleStyleSheet()['Normal']))
+
+    # Cerrar el documento y devolver el archivo
+    doc.build(elements)
+    return response
+
 
 #Vistas de Login y Registro
 def register(request):
@@ -185,18 +241,6 @@ def editarCliente(request):
 
     return redirect('indexClientes')
 
-"""
-@login_required
-def eliminarCliente(request, cedula_cliente):
-    cursor = connection.cursor()
-    cursor.callproc('SP_ELIMINAR_CLIENTE', [cedula_cliente])
-    cursor.close()
-    connection.commit()
-    connection.close()
-
-    messages.success(request, '¡Cliente eliminado!')
-    return redirect('indexClientes')
-"""
 @login_required
 def eliminarCliente(request, cedula_cliente):
     try:
@@ -209,7 +253,6 @@ def eliminarCliente(request, cedula_cliente):
     except IntegrityError:
         messages.error(request, 'No se puede eliminar el cliente porque tiene registros asociados en otras tablas.')
     return redirect('indexClientes')
-
 
 @login_required
 def indexClientes(request):
@@ -290,13 +333,15 @@ def editarColaborador(request):
 
 @login_required
 def eliminarColaborador(request, id_colaborador):
-    cursor = connection.cursor()
-    cursor.callproc('SP_ELIMINAR_COLABORADOR', [id_colaborador])
-    cursor.close()
-    connection.commit()
-    connection.close()
-
-    messages.success(request, '¡Colaborador eliminado!')
+    try:
+        cursor = connection.cursor()
+        cursor.callproc('SP_ELIMINAR_COLABORADOR', [id_colaborador])
+        cursor.close()
+        connection.commit()
+        connection.close()
+        messages.success(request, '¡Colaborador eliminado!')
+    except IntegrityError:
+        messages.error(request, 'No se puede eliminar el colaborador porque tiene registros asociados en otras tablas.')
     return redirect('indexColaboradores')
 
 @login_required
@@ -321,6 +366,164 @@ def indexColaboradores(request):
     return render(request, 'Colaboradores/indexColaboradores.html', {'colaboradores': colaboradores})
 
 #Vistas Categoria
+@login_required
+def registrarCategoria(request):
+    if request.method == 'POST':
+        try:
+            nombre = request.POST['txtNombre']
+            descripcion = request.POST['txtDescripcion']
+            cursor = connection.cursor()
+            cursor.callproc('SP_INSERTAR_CATEGORIA', [nombre, descripcion])
+            cursor.close()
+            connection.commit()
+            connection.close()
+            messages.success(request, '¡Categoría registrada!')
+            return redirect('indexCategorias')
+        except IntegrityError:
+            messages.error(request, 'Ya existe una categoría con este id')
+        except Exception:
+            return HttpResponseServerError()
+    return render(request, 'Categorias/indexCategorias.html')
+
+@login_required
+def edicionCategoria(request, id_categoria):
+    categoria = Categoria.objects.get(id_categoria=id_categoria)
+    return render(request, 'Categorias/edicionCategoria.html', {'categoria':categoria})
+
+@login_required
+def editarCategoria(request):
+    id_categoria = request.POST['id_categoria']
+    nombre = request.POST['txtNombre']
+    descripcion = request.POST['txtDescripcion']
+    
+    cursor = connection.cursor()
+    resultado = cursor.callfunc('F_ACTUALIZAR_CATEGORIA', bool, [id_categoria, nombre, descripcion])
+    cursor.close()
+
+    if resultado:
+        messages.success(request, '¡Categoría actualizada!')
+    else:
+        messages.error(request, 'No se pudo actualizar la categoría')
+
+    return redirect('indexCategorias')
+
+@login_required
+def eliminarCategoria(request, id_categoria):
+    try:
+        cursor = connection.cursor()
+        cursor.callproc('SP_ELIMINAR_CATEGORIA', [id_categoria])
+        cursor.close()
+        connection.commit()
+        connection.close()
+        messages.success(request, '¡Categoría eliminada!')
+    except IntegrityError:
+        messages.error(request, 'No se puede eliminar la categoría porque tiene registros asociados en otras tablas.')
+    return redirect('indexCategorias')
+
+@login_required
+def indexCategorias(request):
+    cursor = connection.cursor()
+    categorias_cursor = cursor.callfunc('F_LISTAR_CATEGORIAS', cx_Oracle.CURSOR)
+    categorias = []
+    for categoria in categorias_cursor:
+        categorias.append({
+            'id_categoria': categoria[0],
+            'nombre': categoria[1],
+            'descripcion': categoria[2],
+        })
+    cursor.close()
+    connection.close()
+    return render(request, 'Categorias/indexCategorias.html', {'categorias': categorias})
+
+#Vistas Productos 
+@login_required
+def indexProductos(request):
+    cursor = connection.cursor()
+    productos_cursor = cursor.callfunc('F_LISTAR_PRODUCTOS', cx_Oracle.CURSOR)
+    categorias_cursor = cursor.callfunc('F_LISTAR_CATEGORIAS', cx_Oracle.CURSOR)
+    categorias = []
+    for categoria in categorias_cursor:
+        categorias.append({
+            'id_categoria': categoria[0],
+            'nombre': categoria[1],
+            'descripcion': categoria[2],
+        })
+    productos = []
+    for producto in productos_cursor:
+        productos.append({
+            'cod_producto': producto[0],
+            'nombre': producto[1],
+            'descripcion': producto[2],
+            'precio': producto[3],
+            'stock': producto[4],
+            'pro_id_categoria': producto[5],
+            'estado': producto[6],
+        })
+    cursor.close()
+    connection.close()
+    return render(request, 'Productos/indexProductos.html', {'productos': productos, 'categorias': categorias})
+
+@login_required
+def registrarProducto(request):
+    if request.method == 'POST':
+        try:
+            nombre = request.POST['txtNombre']
+            descripcion = request.POST['txtDescripcion']
+            precio = request.POST['txtPrecio']
+            stock = request.POST['txtStock']
+            pro_id_categoria = request.POST['cmbCategoria']
+            estado = request.POST['cmbEstado']
+            cursor = connection.cursor()
+            cursor.callproc('SP_INSERTAR_PRODUCTO', [nombre, descripcion, precio, stock, pro_id_categoria, estado])
+            cursor.close()
+            connection.commit()
+            connection.close()
+            messages.success(request, '¡Producto registrado!')
+            return redirect('indexProductos')
+        except Exception as e:
+            print(e)
+            messages.error(request, 'No se pudo registrar el producto')
+    return render(request, 'Productos/registrarProducto.html')
+
+@login_required
+def edicionProducto(request, cod_producto):
+    producto = Productos.objects.get(cod_producto=cod_producto)
+    categorias = Categoria.objects.all()
+    return render(request, 'Productos/edicionProducto.html', {'producto': producto, 'categorias': categorias})
+
+@login_required
+def editarProducto(request):
+    cod_producto = request.POST['cod_producto']
+    nombre = request.POST['txtNombre']
+    descripcion = request.POST['txtDescripcion']
+    precio = request.POST['txtPrecio']
+    stock = request.POST['txtStock']
+    pro_id_categoria = request.POST['cmbCategoria']
+    estado = request.POST['cmbEstado']
+    
+    cursor = connection.cursor()
+    resultado = cursor.callfunc('F_ACTUALIZAR_PRODUCTO', bool, [cod_producto, nombre, descripcion, precio, stock, pro_id_categoria, estado])
+    cursor.close()
+
+    if resultado:
+        messages.success(request, '¡Producto actualizado!')
+    else:
+        messages.error(request, 'No se pudo actualizar el producto')
+
+    return redirect('indexProductos')
+
+@login_required
+def eliminarProducto(request, cod_producto):
+    try:
+        cursor = connection.cursor()
+        cursor.callproc('SP_ELIMINAR_PRODUCTO', [cod_producto])
+        cursor.close()
+        connection.commit()
+        connection.close()
+        messages.success(request, '¡Producto eliminado!')
+    except IntegrityError:
+        messages.error(request, 'No se puede eliminar el producto porque tiene registros asociados en otras tablas.')
+    return redirect('indexProductos')
 
 
 
@@ -347,7 +550,7 @@ def indexColaboradores(request):
 
 
 
-
+"""
 #Categoria
 def registrarCategoria(request):
     nombre = request.POST['txtNombre']
@@ -382,6 +585,7 @@ def eliminarCategoria(request, id_categoria):
 def indexCategorias(request):
     categorias = Categoria.objects.all()
     return render(request, 'Categorias/indexCategorias.html', {'categorias':categorias})
+
 
 #Productos
 def registrarProducto(request):
@@ -432,7 +636,7 @@ def eliminarProducto(request, cod_producto):
 def indexProductos(request):
     productos = Productos.objects.all()
     return render(request, 'Productos/indexProductos.html', {'productos':productos})
-
+"""
 #Proveedores
 def registrarProveedor(request):
     nombre = request.POST['txtNombre']

@@ -29,16 +29,16 @@ urlpatterns = [
     #Rutas Categoria
     path('categorias/', views.indexCategorias, name="indexCategorias"),
     path('registrarCategoria/', views.registrarCategoria, name="registrarCategoria"),
-    path('categorias/edicionCategoria/<codigo>', views.edicionCategoria, name="edicionCategoria"),
+    path('categorias/edicionCategoria/<id_categoria>', views.edicionCategoria, name="edicionCategoria"),
     path('editarCategoria/', views.editarCategoria, name="editarCategoria"),
-    path('categorias/eliminarCategoria/<codigo>', views.eliminarCategoria, name="eliminarCategoria"),
+    path('categorias/eliminarCategoria/<id_categoria>', views.eliminarCategoria, name="eliminarCategoria"),
     
     #Rutas Productos
     path('productos/', views.indexProductos, name="indexProductos"),
     path('registrarProducto/', views.registrarProducto, name="registrarProducto"),
-    path('productos/edicionProducto/<codigo>', views.edicionProducto, name="edicionProducto"),
+    path('productos/edicionProducto/<cod_producto>', views.edicionProducto, name="edicionProducto"),
     path('editarProducto/', views.editarProducto, name="editarProducto"),
-    path('productos/eliminarProducto/<codigo>', views.eliminarProducto, name="eliminarProducto"),
+    path('productos/eliminarProducto/<cod_producto>', views.eliminarProducto, name="eliminarProducto"),
     
     #Rutas Proveedores
     path('proveedores/', views.indexProveedores, name="indexProveedores"),
@@ -73,5 +73,8 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('perfil/', views.user_profile, name='perfil'),
     path('logout/', views.user_logout, name='logout'),
+    
+    #Ruta reporte
+    path('reporte/', views.reporte, name='reporte'),
 
 ]
