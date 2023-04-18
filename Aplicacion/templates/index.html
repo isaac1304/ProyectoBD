@@ -1,14 +1,151 @@
-{% extends 'index_master.html' %}
+{% extends 'layouts/base.html' %}
 
-{% block title %}Inicio{% endblock title %} 
+{% block title %}
+  Inicio
+{% endblock %}
 
-{% block content %}
-
-<div class="right_col" role="main">
-  <h1>Proyecto</h1>
+{% block content_header %}
   {% if request.user.is_authenticated %}
-  
+    <div class="col-sm-6">
+      <h1 class="m-0">Reportes</h1>
+    </div>
+    <div class="col-sm-6">
+      <ol class="breadcrumb float-sm-right">
+        <li class="breadcrumb-item">
+          <a href="#">Inicio</a>
+        </li>
+        <li class="breadcrumb-item active">Reportes</li>
+      </ol>
+    </div>
+  {% else %}
+    <div class="col-sm-6">
+      <h1 class="m-0">Inicio</h1>
+    </div>
+    <div class="col-sm-6">
+      <ol class="breadcrumb float-sm-right">
+        <li class="breadcrumb-item">
+          <a href="#">Inicio</a>
+        </li>
+        <li class="breadcrumb-item active">Inicio</li>
+      </ol>
+    </div>
   {% endif %}
-</div>
+{% endblock %}
 
+{% block content_body %}
+  {% if request.user.is_authenticated %}
+    <div class="row">
+      <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-info">
+          <div class="inner">
+            <h4>Reporte de devoluciones</h4>
+          </div>
+          <div class="icon">
+            <i class="ion ion-bag"></i>
+          </div>
+          <a href="{% url 'reporte' %}" class="small-box-footer">Descargar <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-info">
+          <div class="inner">
+            <h4>Reporte de ventas mensuales</h4>
+          </div>
+          <div class="icon">
+            <i class="ion ion-bag"></i>
+          </div>
+          <a href="{% url 'reporte2' %}" class="small-box-footer">Descargar <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-info">
+          <div class="inner">
+            <h4>Reporte de dias con mas ventas</h4>
+          </div>
+          <div class="icon">
+            <i class="ion ion-bag"></i>
+          </div>
+          <a href="{% url 'reporte3' %}" class="small-box-footer">Descargar <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-info">
+          <div class="inner">
+            <h4>Reporte de ventas semanales</h4>
+          </div>
+          <div class="icon">
+            <i class="ion ion-bag"></i>
+          </div>
+          <a href="{% url 'reporte4' %}" class="small-box-footer">Descargar <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-info">
+          <div class="inner">
+            <h4>Reporte de productos mas vendidos</h4>
+          </div>
+          <div class="icon">
+            <i class="ion ion-bag"></i>
+          </div>
+          <a href="{% url 'reporte5' %}" class="small-box-footer">Descargar <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-info">
+          <div class="inner">
+            <h4>Reporte de ventas mensuales</h4>
+          </div>
+          <div class="icon">
+            <i class="ion ion-bag"></i>
+          </div>
+          <a href="#" class="small-box-footer">Descargar <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-info">
+          <div class="inner">
+            <h4>Reporte de ventas mensuales</h4>
+          </div>
+          <div class="icon">
+            <i class="ion ion-bag"></i>
+          </div>
+          <a href="#" class="small-box-footer">Descargar <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-info">
+          <div class="inner">
+            <h4>Reporte de ventas mensuales</h4>
+          </div>
+          <div class="icon">
+            <i class="ion ion-bag"></i>
+          </div>
+          <a href="#" class="small-box-footer">Descargar <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-info">
+          <div class="inner">
+            <h4>Reporte de ventas mensuales</h4>
+          </div>
+          <div class="icon">
+            <i class="ion ion-bag"></i>
+          </div>
+          <a href="#" class="small-box-footer">Descargar <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+    </div>
+    </div>
+  {% else %}
+
+  {% endif %}
 {% endblock %}

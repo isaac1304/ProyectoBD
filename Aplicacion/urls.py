@@ -76,5 +76,9 @@ urlpatterns = [
     
     #Ruta reporte
     path('reporte/', views.reporte, name='reporte'),
+    path('reporte2/', views.reporte_ventasxmes, name='reporte2'),
+    path('reporte3/', views.reporte_diasmasventas, name='reporte3'),
+    path('reporte4/', views.reporte_ventasxsemana, name='reporte4'),
+    path('reporte5/', views.reporte_productosmasvendidos, name='reporte5'),
 
 ]

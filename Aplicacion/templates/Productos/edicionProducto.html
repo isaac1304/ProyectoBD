@@ -1,0 +1,72 @@
+{% extends 'index_master.html' %}
+
+{% block title %}Gestion de Productos{% endblock title %} 
+
+{% block content %}
+
+<div class="right_col row" role="main">
+    <div class="col-md-12 offset-md-12">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-dismissible alert-success fade show" role="alert">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <strong class="text-dark">{{ message }}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <h2>Gestion de Productos</h2>
+        <div class="card">
+            <div class="card-body">
+                
+                <form action="/editarProducto/" method="POST">
+                    {% csrf_token %}
+                    <div class="col-md-6 mb-3">
+                        <label for="txtNombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="txtNombre" name="txtNombre" placeholder="Nombre" value="{{ producto.nombre }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="txtDescripcion" class="form-label">Descripción</label>
+                        <input type="text" class="form-control" id="txtDescripcion" name="txtDescripcion" placeholder="Descripción" value="{{ producto.descripcion }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="txtPrecio" class="form-label">Precio</label>
+                        <input type="number" class="form-control" id="txtPrecio" name="txtPrecio" placeholder="Precio" value="{{producto.precio}}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="txtStock" class="form-label">Stock</label>
+                        <input type="number" class="form-control" id="txtStock" name="txtStock" placeholder="Stock" value="{{ producto.stock }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cmbCategoria" class="form-label">Categoría</label>
+                        <select class="form-select" id="cmbCategoria" name="cmbCategoria" required>
+                            {% for categoria in categorias %}
+                            {% if producto.pro_id_categoria.id_categoria == categoria.id_categoria%}
+                            <option value="{{ categoria.id_categoria }}" selected>{{ categoria.nombre }}</option>
+                            {% else %}
+                            <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>                                     
+                    <div class="col-md-6 mb-3">
+                        <label for="cmbEstado" class="form-label">Estado</label>
+                        <select class="form-select" id="cmbEstado" name="cmbEstado" required>
+                            {% if producto.estado == 'Disponible' %}
+                            <option value="Disponible" selected>Disponible</option>
+                            <option value="Agotado">Agotado</option>
+                            {% else %}
+                            <option value="Disponible">Disponible</option>
+                            <option value="Agotado" selected>Agotado</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <input type="hidden" name="cod_producto" value="{{ producto.cod_producto }}">
+                    <button type="submit" class="btn btn-primary w-100">Actualizar Producto</button>
+                </form>
+                
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

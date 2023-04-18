@@ -11,14 +11,11 @@ from datetime import datetime
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseServerError
 import cx_Oracle
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
+
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
-
-
-# Create your views here.
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.enums import TA_CENTER
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
 
 #Vistas Reporte
 
@@ -28,6 +25,51 @@ def reporte(request):
         cursor.execute('SELECT * FROM vista_devoluciones')
         datos = cursor.fetchall()
 
+    # Crear el documento con ReportLab
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte.pdf"'
+
+    # Crear el documento con ReportLab
+    doc = SimpleDocTemplate(response, pagesize=letter)
+    elements = []
+
+    # Agregar título al documento
+    elements.append(Paragraph('Vista de las devoluciones con información del cliente, el producto y la factura', getSampleStyleSheet()['Heading1']))
+
+    # Agregar tabla con estilos Bootstrap
+    headings = ['Fecha', 'Cliente', 'Producto', 'Factura', 'Monto']
+    data = [headings] + [tuple(dato[1:]) for dato in datos]
+    t = Table(data)
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), '#212529'),
+        ('TEXTCOLOR', (0, 0), (-1, 0), 'white'),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), 'white'),
+        ('TEXTCOLOR', (0, 1), (-1, -1), 'black'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 1, '#dee2e6'),
+    ]))
+    elements.append(t)
+
+    # Agregar un espacio en blanco antes del final del documento
+    elements.append(Paragraph('<br/><br/><br/><br/>', getSampleStyleSheet()['Normal']))
+
+    # Cerrar el documento y devolver el archivo
+    doc.build(elements)
+    return response
+
+
+def reporte_ventasxmes(request):
+    # Obtener los datos de la vista de devoluciones
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT * FROM VENTAS_MENSUALES_COLABORADOR')
+        datos = cursor.fetchall()
+
     # Generar el reporte con ReportLab
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="reporte.pdf"'
@@ -35,13 +77,13 @@ def reporte(request):
     # Crear el documento con ReportLab
     doc = SimpleDocTemplate(response, pagesize=letter)
     elements = []
-    
+
     # Agregar título al documento
-    elements.append(Paragraph('Vista de las devoluciones con información del cliente, el producto y la factura', getSampleStyleSheet()['Heading1']))
+    elements.append(Paragraph('Reporte de ventas de colaboradores mensuales', getSampleStyleSheet()['Heading1']))
 
     # Agregar encabezados de columna
-    headings = ('Fecha', 'Cliente', 'Producto', 'Factura', 'Monto')
-    data = [headings] + [tuple(dato[1:]) for dato in datos]
+    headings = ('Nombre colaborador', 'Mes', 'Cantidad ventas')
+    data = [headings] + [tuple(dato[0:]) for dato in datos]
 
     # Crear la tabla y definir su estilo
     table = Table(data)
@@ -69,6 +111,146 @@ def reporte(request):
     doc.build(elements)
     return response
 
+def reporte_diasmasventas(request):
+    # Obtener los datos de la vista de devoluciones
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT * FROM DIA_MAX_VENTAS')
+        datos = cursor.fetchall()
+
+    # Generar el reporte con ReportLab
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte.pdf"'
+
+    # Crear el documento con ReportLab
+    doc = SimpleDocTemplate(response, pagesize=letter)
+    elements = []
+
+    # Agregar título al documento
+    elements.append(Paragraph('Reporte de dias con mas ventas', getSampleStyleSheet()['Heading1']))
+
+    # Agregar encabezados de columna
+    headings = ('Dia', 'Cantidad Ventas')
+    data = [headings] + [tuple(dato[0:]) for dato in datos]
+
+    # Crear la tabla y definir su estilo
+    table = Table(data)
+    style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), '#7f7f7f'),
+        ('TEXTCOLOR', (0, 0), (-1, 0), (1, 1, 1)),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), (1, 1, 1)),
+        ('TEXTCOLOR', (0, 1), (-1, -1), (0, 0, 0)),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 1, (0, 0, 0)),
+    ])
+    table.setStyle(style)
+    elements.append(table)
+
+    # Agregar un espacio en blanco antes del final del documento
+    elements.append(Paragraph('<br/><br/><br/><br/>', getSampleStyleSheet()['Normal']))
+
+    # Cerrar el documento y devolver el archivo
+    doc.build(elements)
+    return response
+
+def reporte_ventasxsemana(request):
+    # Obtener los datos de la vista de devoluciones
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT * FROM VENTAS_SEMANALES_COLABORADOR')
+        datos = cursor.fetchall()
+
+    # Generar el reporte con ReportLab
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte.pdf"'
+
+    # Crear el documento con ReportLab
+    doc = SimpleDocTemplate(response, pagesize=letter)
+    elements = []
+
+    # Agregar título al documento
+    elements.append(Paragraph('Reporte de ventas de colaboradores por semana', getSampleStyleSheet()['Heading1']))
+
+    # Agregar encabezados de columna
+    headings = ('Nombre Colaborador', 'Nombre producto', 'Cantidad')
+    data = [headings] + [tuple(dato[0:]) for dato in datos]
+
+    # Crear la tabla y definir su estilo
+    table = Table(data)
+    style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), '#7f7f7f'),
+        ('TEXTCOLOR', (0, 0), (-1, 0), (1, 1, 1)),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), (1, 1, 1)),
+        ('TEXTCOLOR', (0, 1), (-1, -1), (0, 0, 0)),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 1, (0, 0, 0)),
+    ])
+    table.setStyle(style)
+    elements.append(table)
+
+    # Agregar un espacio en blanco antes del final del documento
+    elements.append(Paragraph('<br/><br/><br/><br/>', getSampleStyleSheet()['Normal']))
+
+    # Cerrar el documento y devolver el archivo
+    doc.build(elements)
+    return response
+
+def reporte_productosmasvendidos(request):
+    # Obtener los datos de la vista de devoluciones
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT * FROM PRODUCTOS_MAS_VENDIDOS')
+        datos = cursor.fetchall()
+
+    # Generar el reporte con ReportLab
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte.pdf"'
+
+    # Crear el documento con ReportLab
+    doc = SimpleDocTemplate(response, pagesize=letter)
+    elements = []
+
+    # Agregar título al documento
+    elements.append(Paragraph('Reporte de productos mas vendidos', getSampleStyleSheet()['Heading1']))
+
+    # Agregar encabezados de columna
+    headings = ('Nombre Producto','Cantidad')
+    data = [headings] + [tuple(dato[0:]) for dato in datos]
+
+    # Crear la tabla y definir su estilo
+    table = Table(data)
+    style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), '#7f7f7f'),
+        ('TEXTCOLOR', (0, 0), (-1, 0), (1, 1, 1)),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), (1, 1, 1)),
+        ('TEXTCOLOR', (0, 1), (-1, -1), (0, 0, 0)),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 1, (0, 0, 0)),
+    ])
+    table.setStyle(style)
+    elements.append(table)
+
+    # Agregar un espacio en blanco antes del final del documento
+    elements.append(Paragraph('<br/><br/><br/><br/>', getSampleStyleSheet()['Normal']))
+
+    # Cerrar el documento y devolver el archivo
+    doc.build(elements)
+    return response
 
 #Vistas de Login y Registro
 def register(request):
@@ -93,42 +275,6 @@ def user_login(request):
             messages.error(request, 'Credenciales invalidas')
     form = UserLoginForm()
     return render(request, 'inicio/login.html', {'form': form})
-
-"""
-def user_login(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = auth.authenticate(username=username, password=password)
-        if user is not None and user.is_active:
-            auth.login(request, user)
-            return redirect('index')
-        else:
-            messages.error(request, 'Invalid login credentials')
-            return redirect('login')
-    else:
-        messages.error(request, 'The current path, ' + request.path + ', didn’t match any of these.')
-        return redirect('index')
-    
-def user_login(request):
-    if request.method == 'POST':
-        form = UserLoginForm(data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return redirect('index.html')
-                else:
-                    return render(request, 'inicio/login.html', {'form': form, 'error_message': 'Your account has been disabled'})
-            else:
-                return render(request, 'inicio/login.html', {'form': form, 'error_message': 'Invalid login'})
-    else:
-        form = UserLoginForm()
-    return render(request, 'inicio/login.html', {'form': form})
-"""
 
 @login_required
 def user_logout(request):
@@ -168,12 +314,12 @@ def editarCurso(request):
     codigo = request.POST['txtCodigo']
     nombre = request.POST['txtNombre']
     creditos = request.POST['numCreditos']
-    
+
     curso = Curso.objects.get(codigo=codigo)
     curso.nombre = nombre
     curso.creditos = creditos
     curso.save()
-    
+
     messages.success(request, '¡Curso editado!')
     return redirect('indexCursos')
 
@@ -197,20 +343,20 @@ def registrarCliente(request):
             correo = request.POST['txtCorreo']
             telefono = request.POST['txtTelefono']
             direccion = request.POST['txtDireccion']
-            
+
             cursor = connection.cursor()
             cursor.callproc('SP_INSERTAR_CLIENTE', [cedula, nombre, apellido1, apellido2, nacimiento, correo, telefono, direccion])
             cursor.close()
             connection.commit()
             connection.close()
-            
+
             messages.success(request, '¡Cliente registrado!')
             return redirect('indexClientes')
         except IntegrityError:
             messages.error(request, 'Ya existe un cliente con esta cédula')
         except Exception:
             return HttpResponseServerError()
-    
+
     return render(request, 'Clientes/indexClientes.html')
 
 @login_required
@@ -229,7 +375,7 @@ def editarCliente(request):
     correo = request.POST['txtCorreo']
     telefono = request.POST['txtTelefono']
     direccion = request.POST['txtDireccion']
-    
+
     cursor = connection.cursor()
     resultado = cursor.callfunc('F_ACTUALIZAR_CLIENTE', bool, [cedula, nombre, apellido1, apellido2, nacimiento, correo, telefono, direccion])
     cursor.close()
@@ -258,7 +404,7 @@ def eliminarCliente(request, cedula_cliente):
 def indexClientes(request):
     cursor = connection.cursor()
     clientes_cursor = cursor.callfunc('F_LISTAR_CLIENTES', cx_Oracle.CURSOR)
-    
+
     clientes = []
     for cliente in clientes_cursor:
         clientes.append({
@@ -271,7 +417,7 @@ def indexClientes(request):
             'telefono': cliente[6],
             'direccion': cliente[7]
         })
-        
+
     cursor.close()
     connection.close()
 
@@ -319,7 +465,7 @@ def editarColaborador(request):
     telefono = request.POST['txtTelefono']
     puesto = request.POST['txtPuesto']
     direccion = request.POST['txtDireccion']
-    
+
     cursor = connection.cursor()
     resultado = cursor.callfunc('F_ACTUALIZAR_COLABORADOR', bool, [id_colaborador, cedula, nombre, apellido1, apellido2, correo, telefono, puesto, direccion])
     cursor.close()
@@ -381,8 +527,12 @@ def registrarCategoria(request):
             return redirect('indexCategorias')
         except IntegrityError:
             messages.error(request, 'Ya existe una categoría con este id')
+        except cx_Oracle.DatabaseError as e:
+            error, = e.args
+            messages.error(request, f'Error al registrar la categoría: {error.message}')
         except Exception:
-            return HttpResponseServerError()
+            messages.error(request, f'Error en la base de datos: HTTP ERROR 500')
+            #return HttpResponseServerError()
     return render(request, 'Categorias/indexCategorias.html')
 
 @login_required
@@ -395,7 +545,7 @@ def editarCategoria(request):
     id_categoria = request.POST['id_categoria']
     nombre = request.POST['txtNombre']
     descripcion = request.POST['txtDescripcion']
-    
+
     cursor = connection.cursor()
     resultado = cursor.callfunc('F_ACTUALIZAR_CATEGORIA', bool, [id_categoria, nombre, descripcion])
     cursor.close()
@@ -435,7 +585,7 @@ def indexCategorias(request):
     connection.close()
     return render(request, 'Categorias/indexCategorias.html', {'categorias': categorias})
 
-#Vistas Productos 
+#Vistas Productos
 @login_required
 def indexProductos(request):
     cursor = connection.cursor()
@@ -471,8 +621,10 @@ def registrarProducto(request):
             descripcion = request.POST['txtDescripcion']
             precio = request.POST['txtPrecio']
             stock = request.POST['txtStock']
-            pro_id_categoria = request.POST['cmbCategoria']
+            pro_id_categoria  = request.POST.get('cmbCategoria')
+            #pro_id_categoria = request.POST['cmbCategoria']
             estado = request.POST['cmbEstado']
+            print(request.POST)
             cursor = connection.cursor()
             cursor.callproc('SP_INSERTAR_PRODUCTO', [nombre, descripcion, precio, stock, pro_id_categoria, estado])
             cursor.close()
@@ -488,7 +640,16 @@ def registrarProducto(request):
 @login_required
 def edicionProducto(request, cod_producto):
     producto = Productos.objects.get(cod_producto=cod_producto)
-    categorias = Categoria.objects.all()
+    producto.precio = str(producto.precio).replace(',', '.')
+    cursor = connection.cursor()
+    categorias_cursor = cursor.callfunc('F_LISTAR_CATEGORIAS', cx_Oracle.CURSOR)
+    categorias = []
+    for categoria in categorias_cursor:
+        categorias.append({
+            'id_categoria': categoria[0],
+            'nombre': categoria[1],
+            'descripcion': categoria[2],
+        })
     return render(request, 'Productos/edicionProducto.html', {'producto': producto, 'categorias': categorias})
 
 @login_required
@@ -501,10 +662,10 @@ def editarProducto(request):
     pro_id_categoria = request.POST['cmbCategoria']
     estado = request.POST['cmbEstado']
     
+
     cursor = connection.cursor()
     resultado = cursor.callfunc('F_ACTUALIZAR_PRODUCTO', bool, [cod_producto, nombre, descripcion, precio, stock, pro_id_categoria, estado])
     cursor.close()
-
     if resultado:
         messages.success(request, '¡Producto actualizado!')
     else:
@@ -535,108 +696,6 @@ def eliminarProducto(request, cod_producto):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-#Categoria
-def registrarCategoria(request):
-    nombre = request.POST['txtNombre']
-    descripcion = request.POST['txtDescripcion']
-    categoria = Categoria.objects.create(nombre=nombre, descripcion=descripcion)
-    messages.success(request, '¡Categoría registrada!')
-    return redirect('indexCategorias')
-
-def edicionCategoria(request, id_categoria):
-    categoria = Categoria.objects.get(id_categoria=id_categoria)
-    return render(request, 'Categorias/edicionCategoria.html', {'categoria': categoria})
-
-def editarCategoria(request):
-    id_categoria = request.POST['txtId']
-    nombre = request.POST['txtNombre']
-    descripcion = request.POST['txtDescripcion']
-    
-    categoria = Categoria.objects.get(id_categoria=id_categoria)
-    categoria.nombre = nombre
-    categoria.descripcion = descripcion
-    categoria.save()
-    
-    messages.success(request, '¡Categoría editada!')
-    return redirect('indexCategorias')
-
-def eliminarCategoria(request, id_categoria):
-    categoria = Categoria.objects.get(id_categoria=id_categoria)
-    categoria.delete()
-    messages.success(request, '¡Categoría eliminada!')
-    return redirect('indexCategorias')
-
-def indexCategorias(request):
-    categorias = Categoria.objects.all()
-    return render(request, 'Categorias/indexCategorias.html', {'categorias':categorias})
-
-
-#Productos
-def registrarProducto(request):
-    nombre = request.POST['nombre']
-    descripcion = request.POST['descripcion']
-    precio = request.POST['precio']
-    stock = request.POST['stock']
-    categoria = request.POST['categoria']
-    estado = request.POST['estado']
-    
-    producto = Productos.objects.create(nombre=nombre, descripcion=descripcion, precio=precio, 
-                                        stock=stock, pro_id_categoria=categoria, estado=estado)
-    messages.success(request, '¡Producto registrado!')
-    return redirect('indexProductos')
-
-def edicionProducto(request, cod_producto):
-    producto = Productos.objects.get(cod_producto=cod_producto)
-    categorias = Categoria.objects.all()
-    return render(request, 'Productos/edicionProducto.html', {'producto':producto, 'categorias':categorias})
-
-def editarProducto(request):
-    cod_producto = request.POST['cod_producto']
-    nombre = request.POST['nombre']
-    descripcion = request.POST['descripcion']
-    precio = request.POST['precio']
-    stock = request.POST['stock']
-    categoria = request.POST['categoria']
-    estado = request.POST['estado']
-    
-    producto = Productos.objects.get(cod_producto=cod_producto)
-    producto.nombre = nombre
-    producto.descripcion = descripcion
-    producto.precio = precio
-    producto.stock = stock
-    producto.pro_id_categoria = categoria
-    producto.estado = estado
-    producto.save()
-    
-    messages.success(request, '¡Producto editado!')
-    return redirect('indexProductos')
-
-def eliminarProducto(request, cod_producto):
-    producto = Productos.objects.get(cod_producto=cod_producto)
-    producto.delete()
-    messages.success(request, '¡Producto eliminado!')
-    return redirect('indexProductos')
-
-def indexProductos(request):
-    productos = Productos.objects.all()
-    return render(request, 'Productos/indexProductos.html', {'productos':productos})
-"""
 #Proveedores
 def registrarProveedor(request):
     nombre = request.POST['txtNombre']
@@ -657,14 +716,14 @@ def editarProveedor(request):
     correo = request.POST['txtCorreo']
     telefono = request.POST['txtTelefono']
     direccion = request.POST['txtDireccion']
-    
+
     proveedor = Proveedores.objects.get(id_proveedor=id_proveedor)
     proveedor.nombre = nombre
     proveedor.correo = correo
     proveedor.telefono = telefono
     proveedor.direccion = direccion
     proveedor.save()
-    
+
     messages.success(request, '¡Proveedor editado!')
     return redirect('indexProveedores')
 
@@ -683,9 +742,9 @@ def registrarSucursal(request):
     nombre = request.POST['txtNombre']
     telefono = request.POST['txtTelefono']
     direccion = request.POST['txtDireccion']
-    
+
     sucursal = Sucursales.objects.create(nombre=nombre, telefono=telefono, direccion=direccion)
-    
+
     messages.success(request, '¡Sucursal registrada!')
     return redirect('indexSucursales')
 
@@ -698,20 +757,20 @@ def editarSucursal(request):
     nombre = request.POST['txtNombre']
     telefono = request.POST['txtTelefono']
     direccion = request.POST['txtDireccion']
-    
+
     sucursal = Sucursales.objects.get(id_sucursal=id_sucursal)
     sucursal.nombre = nombre
     sucursal.telefono = telefono
     sucursal.direccion = direccion
     sucursal.save()
-    
+
     messages.success(request, '¡Sucursal editada!')
     return redirect('indexSucursales')
 
 def eliminarSucursal(request, id_sucursal):
     sucursal = Sucursales.objects.get(id_sucursal=id_sucursal)
     sucursal.delete()
-    
+
     messages.success(request, '¡Sucursal eliminada!')
     return redirect('indexSucursales')
 
@@ -732,9 +791,9 @@ def registrarFactura(request):
         fecha = request.POST['fecha']
         total_pagado = request.POST['total_pagado']
 
-        factura = Facturas.objects.create(fac_ced_cliente=cedula_cliente, fac_cod_producto=codigo_producto, 
+        factura = Facturas.objects.create(fac_ced_cliente=cedula_cliente, fac_cod_producto=codigo_producto,
                                         fac_id_colaborador=id_colaborador, fecha=fecha, total_pagado=total_pagado)
-        
+
         messages.success(request, '¡Factura registrada!')
         return redirect('indexFacturas')
     else:
@@ -783,12 +842,12 @@ def registrarDevolucion(request):
     dev_cod_producto_id = request.POST['dev_cod_producto_id']
     dev_cod_factura_id = request.POST['dev_cod_factura_id']
     monto_devolucion = request.POST['monto_devolucion']
-    
+
     devolucion = Devoluciones.objects.create(
-        fecha=fecha, 
-        dev_ced_cliente_id=dev_ced_cliente_id, 
-        dev_cod_producto_id=dev_cod_producto_id, 
-        dev_cod_factura_id=dev_cod_factura_id, 
+        fecha=fecha,
+        dev_ced_cliente_id=dev_ced_cliente_id,
+        dev_cod_producto_id=dev_cod_producto_id,
+        dev_cod_factura_id=dev_cod_factura_id,
         monto_devolucion=monto_devolucion
     )
     messages.success(request, '¡Devolución registrada!')
@@ -805,7 +864,7 @@ def editarDevolucion(request):
     dev_cod_producto_id = request.POST['dev_cod_producto_id']
     dev_cod_factura_id = request.POST['dev_cod_factura_id']
     monto_devolucion = request.POST['monto_devolucion']
-    
+
     devolucion = Devoluciones.objects.get(id_devolucion=codigo)
     devolucion.fecha = fecha
     devolucion.dev_ced_cliente_id = dev_ced_cliente_id
@@ -813,7 +872,7 @@ def editarDevolucion(request):
     devolucion.dev_cod_factura_id = dev_cod_factura_id
     devolucion.monto_devolucion = monto_devolucion
     devolucion.save()
-    
+
     messages.success(request, '¡Devolución editada!')
     return redirect('indexDevoluciones')
 
