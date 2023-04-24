@@ -1,71 +1,93 @@
-{% extends 'index_master.html' %}
+{% extends 'layouts/base.html' %}
 
-{% block title %}Gestion de Productos{% endblock title %} 
+{% block title %} Modificar Producto {% endblock %}
 
-{% block content %}
+{%block content_header %}
+<div class="col-sm-6">
+    <h1 class="m-0">Gestion de Productos</h1>
+</div>
+<div class="col-sm-6">
+    <ol class="breadcrumb float-sm-right">
+        <li class="breadcrumb-item">
+            <a href="#">Inicio</a>
+        </li>
+        <li class="breadcrumb-item active">Productos</li>
+    </ol>
+</div>
+{% endblock %}
 
-<div class="right_col row" role="main">
-    <div class="col-md-12 offset-md-12">
+{% block content_body %}
+<div class="row">
+    <div class="col-md-12">
         {% if messages %}
         {% for message in messages %}
-        <div class="alert alert-dismissible alert-success fade show" role="alert">
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-success alert-dismissible show" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
             <strong class="text-dark">{{ message }}</strong>
         </div>
         {% endfor %}
         {% endif %}
-        <h2>Gestion de Productos</h2>
-        <div class="card">
-            <div class="card-body">
-                
-                <form action="/editarProducto/" method="POST">
-                    {% csrf_token %}
-                    <div class="col-md-6 mb-3">
-                        <label for="txtNombre" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="txtNombre" name="txtNombre" placeholder="Nombre" value="{{ producto.nombre }}" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="txtDescripcion" class="form-label">Descripción</label>
-                        <input type="text" class="form-control" id="txtDescripcion" name="txtDescripcion" placeholder="Descripción" value="{{ producto.descripcion }}" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="txtPrecio" class="form-label">Precio</label>
-                        <input type="number" class="form-control" id="txtPrecio" name="txtPrecio" placeholder="Precio" value="{{producto.precio}}" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="txtStock" class="form-label">Stock</label>
-                        <input type="number" class="form-control" id="txtStock" name="txtStock" placeholder="Stock" value="{{ producto.stock }}" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="cmbCategoria" class="form-label">Categoría</label>
-                        <select class="form-select" id="cmbCategoria" name="cmbCategoria" required>
-                            {% for categoria in categorias %}
-                            {% if producto.pro_id_categoria.id_categoria == categoria.id_categoria%}
-                            <option value="{{ categoria.id_categoria }}" selected>{{ categoria.nombre }}</option>
-                            {% else %}
-                            <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
-                            {% endif %}
-                            {% endfor %}
-                        </select>
-                    </div>                                     
-                    <div class="col-md-6 mb-3">
-                        <label for="cmbEstado" class="form-label">Estado</label>
-                        <select class="form-select" id="cmbEstado" name="cmbEstado" required>
-                            {% if producto.estado == 'Disponible' %}
-                            <option value="Disponible" selected>Disponible</option>
-                            <option value="Agotado">Agotado</option>
-                            {% else %}
-                            <option value="Disponible">Disponible</option>
-                            <option value="Agotado" selected>Agotado</option>
-                            {% endif %}
-                        </select>
-                    </div>
-                    <input type="hidden" name="cod_producto" value="{{ producto.cod_producto }}">
-                    <button type="submit" class="btn btn-primary w-100">Actualizar Producto</button>
-                </form>
-                
-
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Modificar Producto {{ producto.cod_producto }}</h3>
             </div>
+            <form action="/registrarProducto/" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="cod_producto" value="{{ producto.cod_producto }}">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="txtNombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="txtNombre" name="txtNombre" placeholder="Nombre"
+                                value="{{ producto.nombre }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="txtDescripcion" class="form-label">Descripción</label>
+                            <input type="text" class="form-control" id="txtDescripcion" name="txtDescripcion"
+                                placeholder="Descripción" value="{{ producto.descripcion }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="txtPrecio" class="form-label">Precio</label>
+                            <input type="number" class="form-control" id="txtPrecio" name="txtPrecio"
+                                placeholder="Precio" value="{{producto.precio}}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="txtStock" class="form-label">Stock</label>
+                            <input type="number" class="form-control" id="txtStock" name="txtStock" placeholder="Stock"
+                                value="{{ producto.stock }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cmbCategoria" class="form-label">Categoría</label>
+                            <select class="form-select" id="cmbCategoria" name="cmbCategoria" required>
+                                {% for categoria in categorias %}
+                                {% if producto.pro_id_categoria.id_categoria == categoria.id_categoria%}
+                                <option value="{{ categoria.id_categoria }}" selected>{{ categoria.nombre }}</option>
+                                {% else %}
+                                <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cmbEstado" class="form-label">Estado</label>
+                            <select class="form-select" id="cmbEstado" name="cmbEstado" required>
+                                {% if producto.estado == 'Disponible' %}
+                                <option value="Disponible" selected>Disponible</option>
+                                <option value="Agotado">Agotado</option>
+                                {% else %}
+                                <option value="Disponible">Disponible</option>
+                                <option value="Agotado" selected>Agotado</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary w-100">Modificar</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

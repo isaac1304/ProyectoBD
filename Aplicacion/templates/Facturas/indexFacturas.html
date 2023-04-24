@@ -1,0 +1,244 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Facturas {% endblock %}
+
+{%block content_header %}
+<div class="col-sm-6">
+    <h1 class="m-0">Gestion de Facturas</h1>
+</div>
+<div class="col-sm-6">
+    <ol class="breadcrumb float-sm-right">
+        <li class="breadcrumb-item">
+            <a href="#">Inicio</a>
+        </li>
+        <li class="breadcrumb-item active">Facturas</li>
+    </ol>
+</div>
+{% endblock %}
+
+{% block content_body %}
+
+<div class="row">
+    <div class="col-md-12">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-success alert-dismissible show" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <strong class="text-dark">{{ message }}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Facturas</h3>
+            </div>
+            <form action="/registrarFactura/" method="POST">
+                {% csrf_token %}
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="cedula_cliente" class="form-label">Cliente</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="cliente-buscador"
+                                    placeholder="Buscar cliente..." onkeyup="buscarCliente()">
+                                <select class="form-select" id="cedula_cliente" name="cedula_cliente" required>
+                                    <option value="">Clientes</option>
+                                    {% for cliente in clientes %}
+                                    <option value="{{ cliente.cedula_cliente }}">
+                                        {{ cliente.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>                        
+                        <div class="col-md-6">
+                            <label for="id_colaborador" class="form-label">Colaborador</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="colaborador-buscador"
+                                    placeholder="Buscar colaborador..." onkeyup="buscarColaborador()">
+                                <select class="form-select" id="id_colaborador" name="id_colaborador" required>
+                                    <option value="">Colaborador</option>
+                                    {% for colaborador in colaboradores %}
+                                    <option value="{{ colaborador.id_colaborador }}">
+                                        {{ colaborador.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="producto" class="form-label">Producto</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="producto-buscador"
+                                    placeholder="Buscar producto..." onkeyup="buscarProducto()">
+                                    <select class="form-select" id="producto" name="codigo_producto" required>
+                                        <option value="">Seleccione un producto</option>
+                                        {% for producto in productos %}
+                                        <option value="{{ producto.cod_producto }}" data-nombre="{{ producto.nombre|lower }}"
+                                        data-stock="{{ producto.stock }}" data-precio="{{ producto.precio }}">
+                                            {{ producto.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cantidad" class="form-label">Cantidad</label>
+                            <input type="number" class="form-control" id="cantidad" name="cantidad"
+                                placeholder="Cantidad" required min="1" max="" onchange="actualizarTotalPagado()"
+                                disabled />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="precio" class="form-label">Precio unitario</label>
+                            <input type="number" class="form-control" id="precio_unitario" name="precio_unitario"
+                                placeholder="Precio unitario" step="0.01" required min="1" max="" onchange="actualizarTotalPagado()"
+                                />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="total_pagado" class="form-label">Total a pagar con Iva</label>
+                            <input type="number" class="form-control" id="total_pagado" name="total_pagado" 
+                            placeholder="Total pagado" step="0.01" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary w-100">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Lista de Facturas</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <table id="example1" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Codigo Factura</th>
+                            <th>Cedula Cliente</th>
+                            <th>Codigo Producto</th>
+                            <th>ID Colaborador</th>
+                            <th>Fecha</th>
+                            <th>Total Pagado</th>
+                            <th>Precio Unitario</th>
+                            <th>Cantidad</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for factura in facturas %}
+                        <tr>
+                            <td>{{ factura.cod_factura }}</td>
+                            <td>{{ factura.cedula_cliente }}</td>
+                            <td>{{ factura.codigo_producto }}</td>
+                            <td>{{ factura.id_colaborador }}</td>
+                            <td>{{ factura.fecha }}</td>
+                            <td>{{ factura.total_pagado }}</td>
+                            <td>{{ factura.precio_unitario }}</td>
+                            <td>{{ factura.cantidad }}</td>
+                            <!--
+                            <td> <a href="edicionFactura/{{factura.cod_factura}}" class="btn btn-warning">Editar</a>
+                            </td>
+                            -->
+                            <td> <a href="eliminarFactura/{{factura.cod_factura}}"
+                                    class="btn btn-danger btnEliminacion">Eliminar</a> </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Codigo Factura</th>
+                            <th>Cedula Cliente</th>
+                            <th>Codigo Producto</th>
+                            <th>ID Colaborador</th>
+                            <th>Fecha</th>
+                            <th>Total Pagado</th>
+                            <th>Precio Unitario</th>
+                            <th>Cantidad</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function buscarCliente() {
+        var input = document.getElementById("cliente-buscador");
+        var filter = input.value.toLowerCase();
+        var options = document.querySelectorAll('#cedula_cliente option');
+        for (var i = 0; i < options.length; i++) {
+            var cedula = options[i].value;
+            if (cedula && cedula.indexOf(filter) > -1) {
+                options[i].selected = true;
+                break;
+            }
+        }
+    }    
+</script>
+<script>
+    function buscarColaborador() {
+        var input = document.getElementById("colaborador-buscador");
+        var filter = input.value.toLowerCase();
+        var options = document.querySelectorAll('#id_colaborador option');
+        for (var i = 0; i < options.length; i++) {
+            var colaboradorId = options[i].value;
+            if (colaboradorId && colaboradorId.indexOf(filter) > -1) {
+                options[i].selected = true;
+                break;
+            }
+        }
+    }    
+</script>
+<script>
+    function buscarProducto() {
+        var input = document.getElementById("producto-buscador");
+        var filter = input.value.toLowerCase();
+        var options = document.querySelectorAll('#producto option');
+        for (var i = 0; i < options.length; i++) {
+            var nombre = options[i].getAttribute("data-nombre");
+            if (nombre && nombre.indexOf(filter) > -1) {
+                options[i].selected = true;
+                actualizarStock();
+                actualizarPrecio();
+                break;
+            }
+        }
+    }
+    function actualizarStock() {
+        var productoSelect = document.getElementById("producto");
+        var cantidadInput = document.getElementById("cantidad");
+        var stock = parseInt(productoSelect.options[productoSelect.selectedIndex].getAttribute("data-stock"));
+        cantidadInput.max = stock;
+        cantidadInput.disabled = false;
+    }
+    function actualizarPrecio() {
+        var productoSelect = document.getElementById("producto");
+        var precioInput = document.getElementById("precio_unitario");
+        var precio = productoSelect.options[productoSelect.selectedIndex].getAttribute("data-precio").replace(",", ".");
+        precioInput.max = precio;
+        precioInput.value = precio;
+    }             
+</script>
+<script>
+    function actualizarTotalPagado() {
+        var cantidadInput = document.getElementById("cantidad");
+        var precioInput = document.getElementById("precio_unitario");
+        var totalPagadoInput = document.getElementById("total_pagado");
+
+        var cantidad = parseInt(cantidadInput.value);
+        var precio = parseFloat(precioInput.value);
+
+        var totalSinIVA = cantidad * precio;
+        var totalConIVA = totalSinIVA * 1.13;
+
+        totalPagadoInput.value = totalConIVA.toFixed(2);
+    }    
+</script>
+{% endblock %}

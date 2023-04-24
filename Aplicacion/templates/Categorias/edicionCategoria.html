@@ -1,34 +1,57 @@
-{% extends 'index_master.html' %}
+{% extends 'layouts/base.html' %}
 
-{% block title %}Modificar Categoria{% endblock title %} 
+{% block title %} Modificar Categoria {% endblock %}
 
-{% block content %}
+{%block content_header %}
+<div class="col-sm-6">
+    <h1 class="m-0">Gestion de Categorias</h1>
+</div>
+<div class="col-sm-6">
+    <ol class="breadcrumb float-sm-right">
+        <li class="breadcrumb-item">
+            <a href="#">Inicio</a>
+        </li>
+        <li class="breadcrumb-item active">Categorias</li>
+    </ol>
+</div>
+{% endblock %}
 
-<div class="right_col row" role="main">
-    <div class="col-md-12 offset-md-12">
-        <h2>Modificacion de la Categoria {{categoria.id_categoria}}</h2>
-        <div class="card">
-            <div class="card-body">
-                <form action="/editarCategoria/" method="POST">{% csrf_token %}
-                    <div class="mb-3">
-                        <label for="exampleInputEmail1" class="form-label">Codigo</label>
-                        <input type="text" class="form-control" aria-describedby="emailHelp"
-                            name="id_categoria" class="form-control" value="{{categoria.id_categoria}}" readonly required>
-                    </div> 
-                    <div class="mb-3">
-                        <label for="exampleInputEmail1" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="txtNombre" aria-describedby="emailHelp" name="txtNombre" class="form-control" value="{{categoria.nombre}}"
-                        required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="exampleInputPassword1" class="form-label">Descripcion</label>
-                        <textarea class="form-control" name="txtDescripcion" rows="8" cols="50" required>{{categoria.descripcion}}</textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Modificar</button>
-                </form>
+{% block content_body %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-success alert-dismissible show" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <strong class="text-dark">{{ message }}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Categoria con ID: {{categoria.id_categoria}}</h3>
             </div>
+            <form action="/editarCategoria/" method="POST">
+                {% csrf_token %}
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="exampleInputEmail1" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="txtNombre" aria-describedby="emailHelp" name="txtNombre" class="form-control" value="{{categoria.nombre}}" required>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="exampleInputPassword1" class="form-label">Descripcion</label>
+                            <textarea class="form-control" name="txtDescripcion" rows="4" cols="50" required>{{categoria.descripcion}}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary w-100">Modificar</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
 {% endblock %}

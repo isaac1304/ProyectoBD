@@ -169,7 +169,7 @@ EXEC sp_insertar_producto ('Placa madre ASUS ROG Strix Z390-E Gaming', 'Placa ma
 
 EXEC sp_insertar_producto ('Procesador Intel Core i9-11900K', 'Procesador de gama alta para gaming y aplicaciones exigentes', 619.99, 15, 1, 'Disponible');
 
-EXEC sp_insertar_producto ('Tarjeta gráfica NVIDIA GeForce RTX 3080', 'Tarjeta gráfica de última generación para gaming y renderizado', 1199.99, 10, 1, 'Agotado');
+EXEC sp_insertar_producto ('Tarjeta gráfica NVIDIA GeForce RTX 3080', 'Tarjeta gráfica de última generación para gaming y renderizado', 1199.99, 10, 1, 'Disponible');
 
 EXEC sp_insertar_producto ('Microsoft Windows 10 Pro', 'Sistema operativo de Microsoft para usuarios profesionales', 199.99, 50, 2, 'Disponible');
 
@@ -219,78 +219,155 @@ EXEC sp_insertar_producto ('Procesador Intel Core i9-11900K', 'Procesador de 11ª
 DELETE FROM FACTURAS;
 TRUNCATE TABLE FACTURAS;
 
-EXEC sp_insertar_factura (2, 2, 8, TO_DATE('2023/04/16', 'yyyy/mm/dd'), 250.99);
+CREATE OR REPLACE PROCEDURE INSERTAR_FACTURAS (
+  P_COD_PRODUCTO IN NUMBER,
+  P_CANTIDAD IN NUMBER
+)
+IS
+  V_CEDULA_CLIENTE NUMBER(11);
+  V_ID_COLABORADOR NUMBER(11);
+  V_FECHA DATE;
+  V_TOTAL_PAGADO NUMBER(10,2);
+  V_PRECIO_UNITARIO NUMBER(10,2);
+BEGIN
+  -- Generar números aleatorios para cédula cliente y el id colaborador
+  V_CEDULA_CLIENTE := TRUNC(DBMS_RANDOM.VALUE(1, 19));
+  V_ID_COLABORADOR := TRUNC(DBMS_RANDOM.VALUE(1, 19));
+  
+  -- Generar fecha aleatoria entre 2022 y 2023
+  V_FECHA := TO_DATE(TRUNC(DBMS_RANDOM.VALUE(TO_NUMBER(TO_CHAR(TO_DATE('2022/01/01', 'YYYY/MM/DD'), 'J')), TO_NUMBER(TO_CHAR(TO_DATE('2023/12/31', 'YYYY/MM/DD'), 'J')))), 'J');
+  
+  -- Obtener el precio del producto
+  SELECT PRECIO INTO V_PRECIO_UNITARIO FROM PRODUCTOS WHERE COD_PRODUCTO = P_COD_PRODUCTO;
+  
+  -- Calcular el total pagado, +13% del iva
+  V_TOTAL_PAGADO := P_CANTIDAD * V_PRECIO_UNITARIO * 1.13;
+  
+  -- Insertar la factura en la tabla FACTURAS
+  INSERT INTO FACTURAS (
+    FAC_CED_CLIENTE,
+    FAC_COD_PRODUCTO,
+    FAC_ID_COLABORADOR,
+    FECHA,
+    TOTAL_PAGADO,
+    PRECIO_UNITARIO,
+    CANTIDAD
+  ) VALUES (
+    V_CEDULA_CLIENTE,
+    P_COD_PRODUCTO,
+    V_ID_COLABORADOR,
+    V_FECHA,
+    V_TOTAL_PAGADO,
+    V_PRECIO_UNITARIO,
+    P_CANTIDAD
+  );
+  COMMIT;
+  DBMS_OUTPUT.PUT_LINE('Factura insertada correctamente');
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+    ROLLBACK;
+END;
+/
 
-EXEC sp_insertar_factura (5, 8, 5, TO_DATE('2023/04/15', 'yyyy/mm/dd'), 599.99);
+BEGIN
+  INSERTAR_FACTURAS(P_COD_PRODUCTO => 1, P_CANTIDAD => 2);
+END;
+/
+BEGIN
+  INSERTAR_FACTURAS(P_COD_PRODUCTO => 1, P_CANTIDAD => 1);
+END;
+/
+BEGIN
+  INSERTAR_FACTURAS(P_COD_PRODUCTO => 3, P_CANTIDAD => 2);
+END;
+/
+BEGIN
+  INSERTAR_FACTURAS(P_COD_PRODUCTO => 20, P_CANTIDAD => 1);
+END;
+/
+BEGIN
+  INSERTAR_FACTURAS(P_COD_PRODUCTO => 18, P_CANTIDAD => 1);
+END;
+/
+BEGIN
+  INSERTAR_FACTURAS(P_COD_PRODUCTO => 3, P_CANTIDAD => 2);
+END;
+/
+BEGIN
+  INSERTAR_FACTURAS(P_COD_PRODUCTO => 3, P_CANTIDAD => 3);
+END;
+/
+BEGIN
+  INSERTAR_FACTURAS(P_COD_PRODUCTO => 5, P_CANTIDAD => 5);
+END;
+/
+BEGIN
+  INSERTAR_FACTURAS(P_COD_PRODUCTO => 7, P_CANTIDAD => 3);
+END;
+/
+BEGIN
+  INSERTAR_FACTURAS(P_COD_PRODUCTO => 7, P_CANTIDAD => 1);
+END;
+/
 
-EXEC sp_insertar_factura (12, 11, 11, TO_DATE('2023/04/14', 'yyyy/mm/dd'), 129.99);
+-- SELECT*FROM FACTURAS;
 
-EXEC sp_insertar_factura (1, 1, 18, TO_DATE('2023/04/13', 'yyyy/mm/dd'), 299.99);
-
-EXEC sp_insertar_factura (8, 16, 4, TO_DATE('2023/04/12', 'yyyy/mm/dd'), 159.99);
-
-EXEC sp_insertar_factura (3, 3, 16, TO_DATE('2023/04/11', 'yyyy/mm/dd'), 99.99);
-
-EXEC sp_insertar_factura (13, 19, 6, TO_DATE('2023/04/10', 'yyyy/mm/dd'), 599.99);
-
-EXEC sp_insertar_factura (7, 26, 3, TO_DATE('2023/04/09', 'yyyy/mm/dd'), 1199.99);
-
-EXEC sp_insertar_factura (15, 24, 12, TO_DATE('2023/04/08', 'yyyy/mm/dd'), 499.99);
-
-EXEC sp_insertar_factura (4, 27, 9, TO_DATE('2023/04/07', 'yyyy/mm/dd'), 239.99);
-
-EXEC sp_insertar_factura (5, 1, 10, TO_DATE('2022-02-01', 'YYYY-MM-DD'), 1500);
-
-EXEC sp_insertar_factura (6, 2, 11, TO_DATE('2022-02-02', 'YYYY-MM-DD'), 2000);
-
-EXEC sp_insertar_factura (7, 3, 12, TO_DATE('2022-02-03', 'YYYY-MM-DD'), 2500);
-
-EXEC sp_insertar_factura (8, 4, 13, TO_DATE('2022-02-04', 'YYYY-MM-DD'), 3000);
-
-EXEC sp_insertar_factura (9, 5, 14, TO_DATE('2022-02-05', 'YYYY-MM-DD'), 3500);
-
-EXEC sp_insertar_factura (6, 15, TO_DATE('2022-02-06', 'YYYY-MM-DD'), 4000);
-
-EXEC sp_insertar_factura (11, 7, 16, TO_DATE('2022-02-07', 'YYYY-MM-DD'), 4500);
-
-EXEC sp_insertar_factura (12, 8, 17, TO_DATE('2022-02-08', 'YYYY-MM-DD'), 5000);
-
-EXEC sp_insertar_factura (13, 9, 18, TO_DATE('2022-02-09', 'YYYY-MM-DD'), 5500);
-
-EXEC sp_insertar_factura (14, 26, 6, TO_DATE('2022-02-10', 'YYYY-MM-DD'), 6000);
 ------------------------------------------------------------------------------------------------------------------------------
 DELETE FROM DEVOLUCIONES;
 TRUNCATE TABLE DEVOLUCIONES;
 
-EXEC sp_insertar_devolucion (TO_DATE('2022-01-01', 'YYYY-MM-DD'), 5, 10, 3, 50.00);
+CREATE OR REPLACE PROCEDURE INSERTAR_DEVOLUCIONes (
+  P_COD_FACTURA IN NUMBER
+)
+IS
+  V_CEDULA_CLIENTE NUMBER(11);
+  V_COD_PRODUCTO NUMBER(11);
+  V_MONTO_DEVOLUCION NUMBER(10,2);
+BEGIN
+  -- Obtener la cédula del cliente, el código del producto y el total pagado de la factura
+  SELECT FAC_CED_CLIENTE, FAC_COD_PRODUCTO, TOTAL_PAGADO INTO V_CEDULA_CLIENTE, V_COD_PRODUCTO, V_MONTO_DEVOLUCION FROM FACTURAS WHERE COD_FACTURA = P_COD_FACTURA;
+  -- Calcular el monto de devolución restando el 10% del total pagado
+  V_MONTO_DEVOLUCION := V_MONTO_DEVOLUCION * 0.9;
+  INSERT INTO DEVOLUCIONES (
+    FECHA,
+    DEV_CED_CLIENTE,
+    DEV_COD_PRODUCTO,
+    DEV_COD_FACTURA,
+    MONTO_DEVOLUCION
+  ) VALUES (
+    SYSDATE,
+    V_CEDULA_CLIENTE,
+    V_COD_PRODUCTO,
+    P_COD_FACTURA,
+    V_MONTO_DEVOLUCION
+  );
+  COMMIT;
+  DBMS_OUTPUT.PUT_LINE('Devolución insertada correctamente');
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+    ROLLBACK;
+END;
+/
 
-EXEC sp_insertar_devolucion (TO_DATE('2022-02-02', 'YYYY-MM-DD'), 12, 18, 7, 25.50);
-
-EXEC sp_insertar_devolucion (TO_DATE('2022-03-03', 'YYYY-MM-DD'), 4, 4, 6, 10.00);
-
-EXEC sp_insertar_devolucion (TO_DATE('2022-04-04', 'YYYY-MM-DD'), 8, 21, 9, 75.00);
-
-EXEC sp_insertar_devolucion (TO_DATE('2022-05-05', 'YYYY-MM-DD'), 16, 5, 15, 12.99);
-
-EXEC sp_insertar_devolucion (TO_DATE('2022-06-06', 'YYYY-MM-DD'), 3, 1, 4, 50.00);
-
-EXEC sp_insertar_devolucion (TO_DATE('2022-07-07', 'YYYY-MM-DD'), 14, 12, 10, 35.00);
-
-EXEC sp_insertar_devolucion (TO_DATE('2022-08-08', 'YYYY-MM-DD'), 6, 7, 5, 20.00);
-
-EXEC sp_insertar_devolucion (TO_DATE('2022-09-09', 'YYYY-MM-DD'), 11, 24, 19, 100.00);
-
-EXEC sp_insertar_devolucion (TO_DATE('2022-10-10', 'YYYY-MM-DD'), 7, 9, 3, 30.00);
-
-EXEC sp_insertar_devolucion (TO_DATE('2022-02-01', 'YYYY-MM-DD'), 10, 8, 11, 50.00);
-
-EXEC sp_insertar_devolucion (TO_DATE('2022-02-02', 'YYYY-MM-DD'), 14, 12, 17, 80.00);
-
-EXEC sp_insertar_devolucion (TO_DATE('2022-02-05', 'YYYY-MM-DD'), 9, 5, 10, 20.00);
-
-EXEC sp_insertar_devolucion (TO_DATE('2022-02-06', 'YYYY-MM-DD'), 3, 3, 6, 30.00);
-
-EXEC sp_insertar_devolucion (TO_DATE('2022-02-10', 'YYYY-MM-DD'), 8, 2, 4, 15.00);
-
-EXEC sp_insertar_devolucion (TO_DATE('2022-02-12', 'YYYY-MM-DD'), 7, 20, 14, 100.00);
-
+BEGIN
+  INSERTAR_DEVOLUCIONES(P_COD_FACTURA => 1);
+END;
+/
+BEGIN
+  INSERTAR_DEVOLUCIONES(P_COD_FACTURA => 2);
+END;
+/
+BEGIN
+  INSERTAR_DEVOLUCIONES(P_COD_FACTURA => 3);
+END;
+/
+BEGIN
+  INSERTAR_DEVOLUCIONES(P_COD_FACTURA => 4);
+END;
+/
+BEGIN
+  INSERTAR_DEVOLUCIONES(P_COD_FACTURA => 5);
+END;
+/

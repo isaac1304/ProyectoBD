@@ -1,104 +1,143 @@
-{% extends 'index_master.html' %}
+{% extends 'layouts/base.html' %}
 
-{% block title %}Gestion de Productos{% endblock title %} 
+{% block title %} Productos {% endblock %}
 
-{% block content %}
+{%block content_header %}
+<div class="col-sm-6">
+    <h1 class="m-0">Gestion de Productos</h1>
+</div>
+<div class="col-sm-6">
+    <ol class="breadcrumb float-sm-right">
+        <li class="breadcrumb-item">
+            <a href="#">Inicio</a>
+        </li>
+        <li class="breadcrumb-item active">Productos</li>
+    </ol>
+</div>
+{% endblock %}
 
-<div class="right_col row" role="main">
-    <div class="col-md-12 offset-md-12">
+{% block content_body %}
+
+<div class="row">
+    <div class="col-md-12">
         {% if messages %}
         {% for message in messages %}
-        <div class="alert alert-dismissible alert-success fade show" role="alert">
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-success alert-dismissible show" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
             <strong class="text-dark">{{ message }}</strong>
         </div>
         {% endfor %}
         {% endif %}
-        <h2>Gestion de Productos</h2>
-        <div class="card">
-            <div class="card-body">
-                <form action="/registrarProducto/" method="POST">
-                    {% csrf_token %}
-                    <div class="col-md-6 mb-3">
-                        <label for="txtNombre" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="txtNombre" name="txtNombre" placeholder="Nombre" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="txtDescripcion" class="form-label">Descripción</label>
-                        <input type="text" class="form-control" id="txtDescripcion" name="txtDescripcion" placeholder="Descripción" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="txtPrecio" class="form-label">Precio</label>
-                        <input type="number" class="form-control" id="txtPrecio" name="txtPrecio" placeholder="Precio" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="txtStock" class="form-label">Stock</label>
-                        <input type="number" class="form-control" id="txtStock" name="txtStock" placeholder="Stock" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="cmbCategoria" class="form-label">Categoría</label>
-                        <select class="form-select" id="cmbCategoria" name="cmbCategoria" required>
-                            <option value="" selected>Selecciona una categoría</option>
-                            {% for categoria in categorias %}
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Productos</h3>
+            </div>
+            <form action="/registrarProducto/" method="POST">
+                {% csrf_token %}
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="txtNombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="txtNombre" name="txtNombre" placeholder="Nombre"
+                                required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="txtDescripcion" class="form-label">Descripción</label>
+                            <input type="text" class="form-control" id="txtDescripcion" name="txtDescripcion"
+                                placeholder="Descripción" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="txtPrecio" class="form-label">Precio</label>
+                            <input type="number" class="form-control" id="txtPrecio" name="txtPrecio"
+                                placeholder="Precio" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="txtStock" class="form-label">Stock</label>
+                            <input type="number" class="form-control" id="txtStock" name="txtStock" placeholder="Stock"
+                                required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cmbCategoria" class="form-label">Categoría</label>
+                            <select class="form-select" id="cmbCategoria" name="cmbCategoria" required>
+                                <option value="" selected>Selecciona una categoría</option>
+                                {% for categoria in categorias %}
                                 <option value="{{ categoria.id_categoria }}">{{ categoria.nombre}}</option>
-                            {% endfor %}
-                        </select>
-                    </div>                                     
-                    <div class="col-md-6 mb-3">
-                        <label for="cmbEstado" class="form-label">Estado</label>
-                        <select class="form-select" id="cmbEstado" name="cmbEstado" required>
-                            <option value="Disponible">Disponible</option>
-                            <option value="Agotado">Agotado</option>
-                        </select>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cmbEstado" class="form-label">Estado</label>
+                            <select class="form-select" id="cmbEstado" name="cmbEstado" required>
+                                <option value="Disponible">Disponible</option>
+                                <option value="Agotado">Agotado</option>
+                            </select>
+                        </div>
                     </div>
+                </div>
+                <div class="card-footer">
                     <button type="submit" class="btn btn-primary w-100">Registrar Producto</button>
-                </form>
-                
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Lista de Productos</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <table id="example1" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Código de Producto</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Categoría</th>
+                            <th>Estado</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for producto in productos %}
+                        <tr>
+                            <td>{{ producto.cod_producto }}</td>
+                            <td>{{ producto.nombre }}</td>
+                            <td>{{ producto.descripcion }}</td>
+                            <td>{{ producto.precio }}</td>
+                            <td>{{ producto.stock }}</td>
+                            <td>{{ producto.pro_id_categoria }}</td>
+                            <td>{{ producto.estado }}</td>
+                            <td> <a href="edicionProducto/{{producto.cod_producto}}" class="btn btn-warning">Editar</a>
+                            </td>
+                            <td> <a href="eliminarProducto/{{producto.cod_producto}}"
+                                    class="btn btn-danger btnEliminacion">Eliminar</a> </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Código de Producto</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Categoría</th>
+                            <th>Estado</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
         </div>
     </div>
-    <div class="col-md-12 offset-md-12">
-        <h1>Listado Productos</h1>
-        <div class="table-responsive">
-            <table id="dataTable" class="table table-striped dataTable">
-                <thead>
-                    <tr>
-                        <th>Código de Producto</th>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Precio</th>
-                        <th>Stock</th>
-                        <th>Categoría</th>
-                        <th>Estado</th>
-                        <th colspan="2">Opciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for producto in productos %}
-                    <tr>
-                        <td>{{ producto.cod_producto }}</td>
-                        <td>{{ producto.nombre }}</td>
-                        <td>{{ producto.descripcion }}</td>
-                        <td>{{ producto.precio }}</td>
-                        <td>{{ producto.stock }}</td>
-                        <td>{{ producto.pro_id_categoria }}</td>
-                        <td>{{ producto.estado }}</td>
-                        <td> <a href="edicionProducto/{{producto.cod_producto}}" class="btn btn-warning">Editar</a> </td>
-                        <td> <a href="eliminarProducto/{{producto.cod_producto}}" class="btn btn-danger btnEliminacion">Eliminar</a> </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            
-        </div>
-        
-    </div>
 </div>
-
-<script>
-    $(document).ready(function() {
-      $('#dataTable').DataTable();
-    });
-  </script>
-
 {% endblock %}
