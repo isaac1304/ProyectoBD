@@ -1,0 +1,71 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Modificar Proveedor {% endblock %}
+
+{%block content_header %}
+<div class="col-sm-6">
+    <h1 class="m-0">Gestion de Proveedores</h1>
+</div>
+<div class="col-sm-6">
+    <ol class="breadcrumb float-sm-right">
+        <li class="breadcrumb-item">
+            <a href="#">Inicio</a>
+        </li>
+        <li class="breadcrumb-item active">Proveedores</li>
+    </ol>
+</div>
+{% endblock %}
+
+{% block content_body %}
+
+<div class="row">
+    <div class="col-md-12">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-success alert-dismissible show" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <strong class="text-dark">{{ message }}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Modificar Proveedor {{ proveedor.id_proveedor }}</h3>
+            </div>
+            <form action="/editarProveedor/" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="id_proveedor" value="{{ proveedor.id_proveedor }}" >
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="txtNombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="txtNombre" name="txtNombre" value="{{ proveedor.nombre }}"
+                                required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="txtCorreo" class="form-label">Correo</label>
+                            <input type="email" class="form-control" id="txtCorreo" name="txtCorreo" value="{{ proveedor.correo }}" 
+                            required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="txtTelefono" class="form-label">Telefono</label>
+                            <input type="text" class="form-control" id="txtTelefono" name="txtTelefono"
+                            value="{{ proveedor.telefono }}"  required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="txtDireccion" class="form-label">Direccion</label>
+                            <input type="text" class="form-control" id="txtDireccion" name="txtDireccion" rows="3"
+                            value="{{ proveedor.direccion }}" ></input>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary w-100">Modificar</button>
+                </div>
+            </form>            
+        </div>
+    </div>
+</div>
+{% endblock %}

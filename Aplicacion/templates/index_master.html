@@ -52,7 +52,11 @@
               <div class="menu_section">
                 <!--<h3>General</h3>-->
                 <ul class="nav side-menu">
-                  <li><a href="{% url 'index' %}"><i class="fa fa-home"></i> Home</span></a></li>
+                  {% if user.is_authenticated %}
+                  <li><a href="{% url 'index' %}"><i class="fa fa-home"></i>Reportes</a></li>
+                  {% else %}
+                  <li><a href="{% url 'index' %}"><i class="fa fa-sign-in"></i>Home</a></li>
+                  {% endif %}
                   {% if request.user.is_authenticated %}
                   <li><a href="{% url 'indexClientes' %}"><i class="fa fa-user"></i>Clientes</a></li>
                   <li><a href="{% url 'indexColaboradores' %}"><i class="fa fa-edit"></i>Colaboradores</a></li>

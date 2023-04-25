@@ -5,13 +5,6 @@ urlpatterns = [
     #Inicio
     path('', views.home, name="index"),
 
-    #Rutas Curso
-    path('cursos/', views.indexCursos, name="indexCursos"),
-    path('registrarCurso/', views.registrarCurso, name="registrarCurso"),
-    path('cursos/ediccionCurso/<codigo>', views.ediccionCurso, name="ediccionCurso"),
-    path('editarCurso/', views.editarCurso, name="editarCurso"),
-    path('cursos/eliminarCurso/<codigo>', views.eliminarCurso, name="eliminarCurso"),
-
     #Rutas Clientes
     path('clientes/', views.indexClientes, name="indexClientes"),
     path('registrarCliente/', views.registrarCliente, name="registrarCliente"),
@@ -43,30 +36,26 @@ urlpatterns = [
     #Rutas Proveedores
     path('proveedores/', views.indexProveedores, name="indexProveedores"),
     path('registrarProveedor/', views.registrarProveedor, name="registrarProveedor"),
-    path('proveedores/edicionProveedor/<codigo>', views.edicionProveedor, name="edicionProveedor"),
+    path('proveedores/edicionProveedor/<id_proveedor>', views.edicionProveedor, name="edicionProveedor"),
     path('editarProveedor/', views.editarProveedor, name="editarProveedor"),
-    path('proveedores/eliminarProveedor/<codigo>', views.eliminarProveedor, name="eliminarProveedor"),
+    path('proveedores/eliminarProveedor/<id_proveedor>', views.eliminarProveedor, name="eliminarProveedor"),
 
     #Rutas Sucursales
     path('sucursales/', views.indexSucursales, name="indexSucursales"),
     path('registrarSucursal/', views.registrarSucursal, name="registrarSucursal"),
-    path('sucursales/edicionSucursal/<codigo>', views.edicionSucursal, name="edicionSucursal"),
+    path('sucursales/edicionSucursal/<id_sucursal>', views.edicionSucursal, name="edicionSucursal"),
     path('editarSucursal/', views.editarSucursal, name="editarSucursal"),
-    path('sucursales/eliminarSucursal/<codigo>', views.eliminarSucursal, name="eliminarSucursal"),
+    path('sucursales/eliminarSucursal/<id_sucursal>', views.eliminarSucursal, name="eliminarSucursal"),
 
     #Rutas Facturas
     path('facturas/', views.indexFacturas, name="indexFacturas"),
     path('registrarFactura/', views.registrarFactura, name="registrarFactura"),
-    path('facturas/edicionFactura/<codigo>', views.edicionFactura, name="edicionFactura"),
-    path('editarFactura/', views.editarFactura, name="editarFactura"),
     path('facturas/eliminarFactura/<codigo>', views.eliminarFactura, name='eliminarFactura'),
 
     #Rutas Devoluciones
     path('devoluciones/', views.indexDevoluciones, name="indexDevoluciones"),
     path('registrarDevolucion/', views.registrarDevolucion, name="registrarDevolucion"),
-    path('devoluciones/edicionDevolucion/<codigo>', views.edicionDevolucion, name="edicionDevolucion"),
-    path('editarDevolucion/', views.editarDevolucion, name="editarDevolucion"),
-    path('devoluciones/eliminarDevolucion/<codigo>', views.eliminarDevolucion, name="eliminarDevolucion"),
+    path('devoluciones/eliminarDevolucion/<id_devolucion>', views.eliminarDevolucion, name="eliminarDevolucion"),
 
     #Rutas de login y registro
     path('login/', views.user_login, name='login'),
@@ -76,7 +65,12 @@ urlpatterns = [
 
     #Ruta reporte
     path('reporte/', views.reporte, name='reporte'),
-    path('reporte_clientesmascompras/', views.reporte, name='reporte2'),
-    path('reporte_diasmasventas/', views.reporte, name='reporte3'),
+    path('reporte2/', views.reporte_ventasxmes, name='reporte2'),
+    path('reporte3/', views.reporte_diasmasventas, name='reporte3'),
+    path('reporte4/', views.reporte_ventasxsemana, name='reporte4'),
+    path('reporte5/', views.reporte_productosmasvendidos, name='reporte5'),
+    path('reporte6/', views.reporte_ventasTotalesCategoria, name='reporte6'),
+    path('reporte7/', views.reporte_productosBajoInventario, name='reporte7'),
+    path('reporte8/', views.reporte_clientesCompras, name='reporte8'),
 
 ]

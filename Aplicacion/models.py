@@ -9,7 +9,7 @@ class Curso(models.Model):
     creditos = models.PositiveBigIntegerField()
     
 class Categoria(models.Model):
-    id_categoria = models.AutoField(primary_key=True)
+    id_categoria = models.IntegerField(primary_key=True)
     nombre = models.CharField(max_length=50, blank=True, null=True)
     descripcion = models.CharField(max_length=100, blank=True, null=True)
 
