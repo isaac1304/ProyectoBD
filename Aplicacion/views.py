@@ -372,7 +372,7 @@ def reporte_productosBajoInventario(request):
     # Agregar título al documento
     estilo_titulo = getSampleStyleSheet()['Heading1']
     estilo_titulo.textColor = colors.HexColor("#F04E23")
-    elements.append(Paragraph('Reporte de ventas totales por categoria', estilo_titulo))
+    elements.append(Paragraph('Reporte de productos con bajo inventario', estilo_titulo))
 
     # Agregar fecha y hora de creación
     estilo_fecha = ParagraphStyle(name='fecha', fontName='Helvetica', fontSize=12, textColor=colors.HexColor("#707070"), alignment=1)
@@ -424,7 +424,7 @@ def reporte_clientesCompras(request):
     # Agregar título al documento
     estilo_titulo = getSampleStyleSheet()['Heading1']
     estilo_titulo.textColor = colors.HexColor("#F04E23")
-    elements.append(Paragraph('Reporte de ventas totales por categoria', estilo_titulo))
+    elements.append(Paragraph('Reporte de los clientes y sus compras', estilo_titulo))
 
     # Agregar fecha y hora de creación
     estilo_fecha = ParagraphStyle(name='fecha', fontName='Helvetica', fontSize=12, textColor=colors.HexColor("#707070"), alignment=1)
@@ -520,8 +520,8 @@ def registrarCliente(request):
         except IntegrityError:
             messages.error(request, 'Ya existe un cliente con esta cédula')
         except Exception:
-            return HttpResponseServerError()
-
+            messages.error(request, f'Error en la base de datos: HTTP ERROR 500')
+            #return HttpResponseServerError()
     return render(request, 'Clientes/indexClientes.html')
 
 @login_required
